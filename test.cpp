@@ -1,4 +1,4 @@
-#include "../ad1/impl/natural_numbers.h"
+#include "natural_numbers.h"
 #include <iostream>
 #include <iomanip>
 #include <vector>

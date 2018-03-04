@@ -185,10 +185,10 @@ N operator*(N n1, N n2) {
 }
 
 N::N() { width = 8 * sizeof(W); }
-
-N::N(W w) { width = w; }
-
-N::N(W w, W x) { width=w, datum=-x; }
+N::N(W w) { width = w.datum; }
+N::N(unsigned int w) { width=w; }
+N::N(W w, W x) { width=w.datum, datum=wmask(w)&(-x.datum); }
+N::N(unsigned int w, unsigned int x) { width=w, datum=wmask(w)&(-x); }
 
 std::ostream &operator<<(std::ostream &os, N const &n) {
     return os << n.print();

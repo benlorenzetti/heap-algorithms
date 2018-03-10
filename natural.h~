@@ -1,0 +1,67 @@
+#include <string>
+#include <cassert>
+#include <iostream>
+using namespace std;
+
+/* Defines two complementary, portable unsigned integer classes,
+ * whole numbers W = {0, 1, 2..., N-1} and natural numbers
+ * N = {1, 2, 3..., N}, where N = 2^width.
+ *
+ * Both are represented in a datum of specified width in bits,
+ * and the Natural representation is the 2's complement of the
+ * usual Whole, unsigned integers. For width = 4:
+ *
+ *         (0)1001 =  Whole 9  =    + (8 + 1)
+ *         (1)0111 = Natural 9 = 16 - (4 + 2 + 1)
+*/
+
+template<class N1, class N2>
+N1 operator&(N1 n1, N2 n2) { return n1.AND(n2.datum); }
+
+template<class N1, class N2>
+N1 operator|(N1 n1, N2 n2) { return n1.OR(n2.datum); }
+
+template<class N>
+N operator~(N n) { return n.INV(); }
+
+template<class N>
+N operator++(N n) { return n.INC(); }
+
+template<class N>
+N operator--(N n) { return n.DEC(); }
+
+template<class N1, class N2>
+N1 operator+(N1 n1, N2 n2) { return n1.ADD(n2.datum); }
+
+template<class N>
+N operator-(N n) { return (~n + 1); }
+
+template<class N1, class N2>
+N1 operator-(N1 n1, N2 n2) { return n1 +(-n2); }
+
+template<class N1, class N2>
+N1 operator*(N1 n1, N2 n2) { return n1.MUL(n2.datum); }
+
+
+
+template<typename U, int n>
+class N {
+ public:
+  U datum;
+  constexpr U MASK() { U mask = ~((1<<n)/2-1); return mask; }
+  N() {}
+  N(U x) { datum=-x | MASK(); }
+  W<U, n> INV() { datum=(~datum) | MASK(); return *this; }
+  W<U, n> ROTATE_L(U dist) { datum=(datum<<dist) | MASK(); return *this;}
+  W<U, n> ROTATE_R(U dist) { datum=(datum>>dist) | MASK(); return *this;}
+  W<U, n> AND(U x) { datum=datum&x|MASK(); return *this; }
+  W<U, n> OR(U x) { datum=(datum|x|MASK(); return *this; }
+  W<U, n> ADD(U x) { datum=(datum+x)|MASK(); return *this; }
+  W<U, n> INC() { return this->ADD(-1); }
+  W<U, n> DEC() { return this->ADD(1); }
+  W<U, n> MUL(U x) { datum=(datum*x)|MASK(); return *this; }
+  string print() const;
+//  template<typename U2, int n2>
+//  friend ostream& operator<<(ostream&, const W<U2, n2>&);
+};
+

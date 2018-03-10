@@ -1,6 +1,6 @@
 #include <string>
 #include <cassert>
-#include <iostream>
+#include <iostream> // temp?
 using namespace std;
 
 /* Defines two complementary, portable unsigned integer classes,
@@ -14,24 +14,50 @@ using namespace std;
  *         (0)1001 =  Whole 9  =    + (8 + 1)
  *         (1)0111 = Natural 9 = 16 - (4 + 2 + 1)
 */
+
+template<typename U, int n> class W;
+
 template<typename U, int n>
 class N {
  public:
   U datum;
-  constexpr U MASK() { U mask = ~((1<<n)/2-1); return mask; }
   N() {}
-  N(U x) { datum=-x | MASK(); }
-  W<U, n> INV() { datum=(~datum) | MASK(); return *this; }
-  W<U, n> ROTATE_L(U dist) { datum=(datum<<dist) | MASK(); return *this;}
-  W<U, n> ROTATE_R(U dist) { datum=(datum>>dist) | MASK(); return *this;}
-  W<U, n> AND(U x) { datum=datum&x|MASK(); return *this; }
-  W<U, n> OR(U x) { datum=datum|x|MASK(); return *this; }
-  W<U, n> ADD(U x) { datum=(datum+x)|MASK(); return *this; }
-  W<U, n> INC() { return this->ADD(-1); }
-  W<U, n> DEC() { return this->ADD(1); }
-  W<U, n> MUL(U x) { datum=(datum*x)|MASK(); return *this; }
+  N(U x) { datum=(-x)|MASK(); }
+  template<typename U2, int n2>
+  N(W<U2, n2> x) { datum=x.datum|MASK(); } 
   string print() const;
-//  template<typename U2, int n2>
-//  friend ostream& operator<<(ostream&, const W<U2, n2>&);
+  
+  constexpr U MASK() { U mask=~((1<<n)-1); return mask; }
+  N<U, n> INV() { datum=(~datum) | MASK(); return *this; }
+  N<U, n> INC() { return this->ADD(-1); }
+  N<U, n> DEC() { return this->ADD(1); }
+  N<U, n> ROTATE_L(U dist) { datum=(datum<<dist) | MASK(); return *this; }
+  N<U, n> ROTATE_R(U dist) { datum=(datum>>dist) | MASK(); return *this; }
+  N<U, n> AND(U x) { datum=(datum&x)|MASK(); return *this; }
+  N<U, n> OR(U x) { datum=datum|x; }
+  N<U, n> ADD(U x) { datum=(datum+x)|MASK(); return *this; }
+  N<U, n> MUL(U x) { datum=(datum*x)|MASK(); return *this; }
+  N<U, n> DIV(U x);
+  
+  template<typename U2, int n2>
+    N<U, n> ROTATE_L(W<U2, n2> dist) { ROTATE_L(dist.datum); return *this; }
+  template<typename U2, int n2>
+    N<U, n> ROTATE_R(W<U2, n2> dist) { ROTATE_R(dist.datum); return *this; }
+  template<typename U2, int n2>
+    N<U, n> AND(N<U2, n2> op2) { AND(op2.datum); return *this; }
+  template<typename U2, int n2>
+    N<U, n> OR(N<U2, n2> op2) { OR(op2.datum); return *this; }
+  template<typename U2, int n2>
+    N<U, n> ADD(N<U2, n2> op2) { ADD(op2.datum); return *this; }
+  template<typename U2, int n2>
+    N<U, n> MUL(N<U2, n2> op2) { MUL(op2.datum); return *this; }
 };
 
+template<typename U, int n>
+  string N<U, n>::print() const {
+  if(datum == MASK())
+    return "N";
+  W<U, n> w(*this);
+  w = -w;
+  return w.print();
+}

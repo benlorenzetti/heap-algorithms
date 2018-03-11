@@ -31,6 +31,7 @@ class N {
   N<U, n> INV() { datum=(~datum) | MASK(); return *this; }
   N<U, n> INC() { return this->ADD(-1); }
   N<U, n> DEC() { return this->ADD(1); }
+  W<unsigned int, sizeof(unsigned int)> LOG();
   N<U, n> ROTATE_L(U dist) { datum=(datum<<dist) | MASK(); return *this; }
   N<U, n> ROTATE_R(U dist) { datum=(datum>>dist) | MASK(); return *this; }
   N<U, n> AND(U x) { datum=(datum&x)|MASK(); return *this; }
@@ -60,4 +61,15 @@ template<typename U, int n>
   W<U, n> w(*this);
   w = -w;
   return w.print();
+}
+
+template<typename U, int n>
+  W<unsigned int, sizeof(unsigned int)> N<U, n>::LOG() {
+  W<unsigned int, sizeof(unsigned int)> characteristic = 0;
+  datum = ~datum;
+  if(!datum)
+    return characteristic;
+  do characteristic.INC();
+  while(datum >>= 1);
+  return characteristic;
 }

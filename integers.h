@@ -1,3 +1,5 @@
+#ifndef INTEGERS_H
+#define INTEGERS_H
 #include "whole.h"
 #include "natural.h"
 #include <iostream>
@@ -17,6 +19,11 @@ using namespace std;
 
 template<typename U, int n> class W;
 template<typename U, int n> class N;
+
+template<typename Z>
+  W<unsigned int, sizeof(unsigned int)> log2(Z arg) {
+  return arg.LOG();
+}
 
 template<typename U, int n>
   ostream& operator<<(ostream& os, const W<U, n>& w) {
@@ -62,3 +69,5 @@ template<class Z1, class Z2>
 
 template<class Z1, class Z2>
   Z1 operator>>(Z1 z1, Z2 z2) { return z1.ROTATE_R(z2); }
+
+#endif

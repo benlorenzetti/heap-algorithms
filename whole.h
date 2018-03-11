@@ -14,7 +14,6 @@ using namespace std;
  *         (1)0111 = Natural 9 = 16 - (4 + 2 + 1)
 */
 
-template<typename U, int n> class W;
 template<typename U, int n> class N;
 
 template<typename U, int n>
@@ -35,6 +34,7 @@ class W {
   W<U, n> INV() { datum=(~datum) & MASK(); return *this; }
   W<U, n> INC() { return this->ADD(1); }
   W<U, n> DEC() { return this->ADD(-1); }
+  W<unsigned int, sizeof(unsigned int)> LOG();
   W<U, n> ROTATE_L(U dist) { datum=(datum<<dist) & MASK(); return *this;}
   W<U, n> ROTATE_R(U dist) { datum=(datum>>dist); return *this;}
   W<U, n> AND(U x) { datum=datum&x; return *this; }
@@ -66,4 +66,12 @@ string W<U, n>::print() const {
     s.insert(s.begin(), c);
   } while (w.datum);
   return s;
+}
+
+template<typename U, int n>
+  W<unsigned int, sizeof(unsigned int)> W<U, n>::LOG() {
+  W<unsigned int, sizeof(unsigned int)> characteristic = 0;
+  while(datum >>= 1)
+    characteristic.INC();
+  return characteristic;
 }

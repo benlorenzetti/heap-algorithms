@@ -19,6 +19,11 @@ void save(vector<int>& v, const char* filename) {
     } while(it != v.begin());
 }
 
+template<typename T>
+bool lt(const T& a, const T& b) {return (a<b);}
+template<typename T>
+bool gt(const T& a, const T& b) {return (a>b);}
+
 const int POWER = 5;
 
 int main() {
@@ -32,4 +37,11 @@ int main() {
   m = v.size() / 2;
   b = 0;
   build_dual_heap(v.begin(), a, m, b);
+
+  W<32> x, y, t;
+  x = 125;
+  y = 250;
+  t = 0;
+  cout << "match(" << x << ", " << y << ") = " << match(t, x,y, gt);
+  cout << "\n new x=" << x << ", y=" << y << endl;
 }

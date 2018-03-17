@@ -58,6 +58,17 @@ class N {
     N<n> operator>>(W<n2> dist) { return RIGHT(dist.datum); }
   N<n> operator<<(unsigned int dist) { return LEFT(dist); }
   N<n> operator>>(unsigned int dist) { return RIGHT(dist); }
+
+  template<int n2>
+    bool operator<(const N<n2>& b) const {return (datum > b.datum);}
+  template<int n2>
+    bool operator>(const N<n2>& b) const {return (datum < b.datum);}
+  template<int n2>
+    bool operator==(const N<n2>& b) const {return (datum == b.datum);}
+  template<int n2>
+    bool operator<=(const N<n2>& b) const {return (datum >= b.datum);}
+  template<int n2>
+    bool operator>=(const N<n2>& b) const {return (datum <= b.datum);}
   
   template<int n2>
     N<n> LEFT(W<n2> dist) { LEFT(dist.datum); return *this; }

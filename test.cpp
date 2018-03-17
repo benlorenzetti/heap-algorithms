@@ -1,16 +1,35 @@
-#include "integers.h"
-
+#include "heap-algorithms.h"
+#include <vector>
+#include <algorithm>
+#include <cstdlib>
 #include <iostream>
+#include <fstream>
 using namespace std;
 
+void save(vector<int>& v, const char* filename) {
+  ofstream filestream;
+  filestream.open(filename);
+  N<32> i(0);
+  vector<int>::iterator it = v.end();
+  if(v.size())
+    do {
+      i = i + N<1>(1);
+      --it;
+      filestream << i << "\t" << *it << "\n";
+    } while(it != v.begin());
+}
+
+const int POWER = 5;
+
 int main() {
-	W<unsigned int, 6> w1(0);
-	W<unsigned int, 8> w2(15);
-        N<unsigned int, 8> n1(0);
-	N<unsigned int, 7> n2(128);
-	cout << "w1=" << w1 << ", w2=" << w2 << ", n1=" << n1;
-	cout << ", n2=" << n2 << endl;
-	cout << (w1<<w2) << endl;
-	cout << "log2floor(" << w1 << ") = " << log2(w1) << endl;
-	cout << "log2ceil(" << n1 << ") = " << log2(n1) << endl;
+  vector<int> v(1<<POWER);
+  srand(0);
+  generate(v.begin(), v.end(), rand);
+  save(v, "input.csv");
+
+  N<POWER> a(-v.size());
+  W<POWER> m, b;
+  m = v.size() / 2;
+  b = 0;
+  build_dual_heap(v.begin(), a, m, b);
 }

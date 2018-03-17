@@ -3,6 +3,7 @@
 #include "whole.h"
 #include "natural.h"
 #include <iostream>
+
 using namespace std;
 
 /* Defines two complementary, portable unsigned integer classes,
@@ -17,22 +18,22 @@ using namespace std;
  *         (1)0111 = Natural 9 = 16 - (4 + 2 + 1)
 */
 
-template<typename U, int n> class W;
-template<typename U, int n> class N;
+template<int n> class W;
+template<int n> class N;
 
 template<typename Z>
-  W<unsigned int, sizeof(unsigned int)> log2(Z arg) {
+  W<sizeof(unsigned int)> log2(Z arg) {
   return arg.LOG();
 }
 
-template<typename U, int n>
-  ostream& operator<<(ostream& os, const W<U, n>& w) {
+template<int n>
+  ostream& operator<<(ostream& os, const W<n>& w) {
   os << w.print();
   return os;
 }
 
-template<typename U, int n>
-  ostream& operator<<(ostream& os, const N<U, n>& z) {
+template<int n>
+  ostream& operator<<(ostream& os, const N<n>& z) {
   os << z.print();
   return os;
 }
@@ -46,12 +47,6 @@ Z1 operator|(Z1 z1, Z2 z2) { return z1.OR(z2); }
 template<class Z>
 Z operator~(Z z) { return z.INV(); }
 
-template<class Z>
-Z operator++(Z z) { return z.INC(); }
-
-template<class Z>
-Z operator--(Z z) { return z.DEC(); }
-
 template<class Z1, class Z2>
 Z1 operator+(Z1 z1, Z2 z2) { return z1.ADD(z2); }
 
@@ -63,11 +58,17 @@ Z1 operator-(Z1 z1, Z2 z2) { return z1 +(-z2); }
 
 template<class Z1, class Z2>
 Z1 operator*(Z1 z1, Z2 z2) { return z1.MUL(z2); }
-
+/*
 template<class Z1, class Z2>
   Z1 operator<<(Z1 z1, Z2 z2) { return z1.ROTATE_L(z2); }
 
 template<class Z1, class Z2>
   Z1 operator>>(Z1 z1, Z2 z2) { return z1.ROTATE_R(z2); }
+*/
+
+template<class Z1, class Z2>
+  bool operator==(const Z1& z1, const Z2& z2) {
+  return (z1.datum == z2.datum);
+}
 
 #endif

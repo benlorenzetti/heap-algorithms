@@ -15,57 +15,78 @@ using namespace std;
  *         (1)0111 = Natural 9 = 16 - (4 + 2 + 1)
 */
 
-template<typename U, int n> class W;
+template<int n> class W;
 
-template<typename U, int n>
+template<int n>
 class N {
  public:
-  U datum;
+  unsigned int datum;
   N() {}
-  N(U x) { datum=(-x)|MASK(); }
-  template<typename U2, int n2>
-  N(W<U2, n2> x) { datum=x.datum|MASK(); } 
+  N(unsigned int x) { datum=(-x)|MASK(); }
+  template<int n2>
+  N(W<n2> x) { datum=x.datum|MASK(); } 
   string print() const;
   
-  constexpr U MASK() { U mask=~((1<<n)-1); return mask; }
-  N<U, n> INV() { datum=(~datum) | MASK(); return *this; }
-  N<U, n> INC() { return this->ADD(-1); }
-  N<U, n> DEC() { return this->ADD(1); }
-  W<unsigned int, sizeof(unsigned int)> LOG();
-  N<U, n> ROTATE_L(U dist) { datum=(datum<<dist) | MASK(); return *this; }
-  N<U, n> ROTATE_R(U dist) { datum=(datum>>dist) | MASK(); return *this; }
-  N<U, n> AND(U x) { datum=(datum&x)|MASK(); return *this; }
-  N<U, n> OR(U x) { datum=datum|x; }
-  N<U, n> ADD(U x) { datum=(datum+x)|MASK(); return *this; }
-  N<U, n> MUL(U x) { datum=(datum*x)|MASK(); return *this; }
-  N<U, n> DIV(U x);
+  constexpr unsigned int MASK() {
+    if(n == 8*sizeof(unsigned int))
+      return 0;
+    else if(n == 8*sizeof(unsigned int) - 1)
+      return 1 << (8*sizeof(unsigned int)-2);
+    else {
+      unsigned int mask = ~((1<<n)-1);
+      return mask;
+    }
+  }
+  N<n> INV() { datum=(~datum) | MASK(); return *this; }
+  N<n> INC() { return this->ADD(-1); }
+  N<n> DEC() { return this->ADD(1); }
+  W<sizeof(unsigned int)> LOG();
+  N<n> LEFT(unsigned int dist) { datum=(datum<<dist) | MASK(); return *this; }
+  N<n> RIGHT(unsigned int dist) { datum=(datum>>dist) | MASK(); return *this; }
+  N<n> AND(unsigned int x) { datum=(datum&x)|MASK(); return *this; }
+  N<n> OR(unsigned int x) { datum=datum|x; }
+  N<n> ADD(unsigned int x) { datum=(datum+x)|MASK(); return *this; }
+  N<n> SUB(unsigned int x) { datum=(datum-x)|MASK(); return *this; }
+  N<n> MUL(unsigned int x) { datum=(datum*x)|MASK(); return *this; }
+  N<n> DIV(unsigned int x);
+
+  N<n>& operator++() { INC(); return *this; }
+  N<n>& operator--() { DEC(); return *this; }
+  template<int n2>
+    N<n> operator<<(W<n2> dist) { return LEFT(dist.datum); }
+  template<int n2>
+    N<n> operator>>(W<n2> dist) { return RIGHT(dist.datum); }
+  N<n> operator<<(unsigned int dist) { return LEFT(dist); }
+  N<n> operator>>(unsigned int dist) { return RIGHT(dist); }
   
-  template<typename U2, int n2>
-    N<U, n> ROTATE_L(W<U2, n2> dist) { ROTATE_L(dist.datum); return *this; }
-  template<typename U2, int n2>
-    N<U, n> ROTATE_R(W<U2, n2> dist) { ROTATE_R(dist.datum); return *this; }
-  template<typename U2, int n2>
-    N<U, n> AND(N<U2, n2> op2) { AND(op2.datum); return *this; }
-  template<typename U2, int n2>
-    N<U, n> OR(N<U2, n2> op2) { OR(op2.datum); return *this; }
-  template<typename U2, int n2>
-    N<U, n> ADD(N<U2, n2> op2) { ADD(op2.datum); return *this; }
-  template<typename U2, int n2>
-    N<U, n> MUL(N<U2, n2> op2) { MUL(op2.datum); return *this; }
+  template<int n2>
+    N<n> LEFT(W<n2> dist) { LEFT(dist.datum); return *this; }
+  template<int n2>
+    N<n> RIGHT(W<n2> dist) { RIGHT(dist.datum); return *this; }
+  template<int n2>
+    N<n> AND(N<n2> op2) { AND(op2.datum); return *this; }
+  template<int n2>
+    N<n> OR(N<n2> op2) { OR(op2.datum); return *this; }
+  template<int n2>
+    N<n> ADD(N<n2> op2) { ADD(op2.datum); return *this; }
+  template<int n2>
+    N<n> SUB(N<n2> op2) { SUB(op2.datum); return *this; }
+  template<int n2>
+    N<n> MUL(N<n2> op2) { MUL(op2.datum); return *this; }
 };
 
-template<typename U, int n>
-  string N<U, n>::print() const {
+template<int n>
+  string N<n>::print() const {
   if(datum == MASK())
     return "N";
-  W<U, n> w(*this);
+  W<n> w(*this);
   w = -w;
   return w.print();
 }
 
-template<typename U, int n>
-  W<unsigned int, sizeof(unsigned int)> N<U, n>::LOG() {
-  W<unsigned int, sizeof(unsigned int)> characteristic = 0;
+template<int n>
+W<sizeof(unsigned int)> N<n>::LOG() {
+  W<sizeof(unsigned int)> characteristic = 0;
   datum = ~datum;
   if(!datum)
     return characteristic;

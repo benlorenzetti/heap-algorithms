@@ -1,5 +1,6 @@
 #include <string>
 #include <cassert>
+#include <iostream> // temp
 using namespace std;
 
 /* Defines two complementary, portable unsigned integer classes,
@@ -14,52 +15,70 @@ using namespace std;
  *         (1)0111 = Natural 9 = 16 - (4 + 2 + 1)
 */
 
-template<typename U, int n> class N;
+template<int n> class N;
 
-template<typename U, int n>
+template<int n>
 class W {
  public:
-  U datum;
+  unsigned int datum;
   
   string print() const;
-  template<typename U2, int n2>
-  friend ostream& operator<<(ostream&, const W<U2, n2>&);
+  template<int n2>
+  friend ostream& operator<<(ostream&, const W<n2>&);
   
   W() {}
-  W(U x) { datum=x & MASK(); }
-  template<typename U2, int n2>
-  W(N<U2, n2> x) { datum=x.datum&MASK(); }
+  W(unsigned int x) { datum=x & MASK(); }
+  template<int n2>
+  W(N<n2> x) { datum=x.datum&MASK(); }
   
-  constexpr U MASK() { U mask = (1<<n)-1; return mask; }
-  W<U, n> INV() { datum=(~datum) & MASK(); return *this; }
-  W<U, n> INC() { return this->ADD(1); }
-  W<U, n> DEC() { return this->ADD(-1); }
-  W<unsigned int, sizeof(unsigned int)> LOG();
-  W<U, n> ROTATE_L(U dist) { datum=(datum<<dist) & MASK(); return *this;}
-  W<U, n> ROTATE_R(U dist) { datum=(datum>>dist); return *this;}
-  W<U, n> AND(U x) { datum=datum&x; return *this; }
-  W<U, n> OR(U x) { datum=(datum|x)&MASK(); return *this; }
-  W<U, n> ADD(U x) { datum=(datum+x)&MASK(); return *this; }
-  W<U, n> MUL(U x) { datum=(datum*x)&MASK(); return *this; }
+  constexpr unsigned int MASK() {
+    if(n == 8*sizeof(unsigned int))
+      return -1;
+    else if(n == (8*sizeof(unsigned int))-1)
+      return ~(1<<(8*sizeof(unsigned int)-2));
+    else {
+      unsigned int mask = (1<<n)-1;
+      return mask;
+    }
+  }
+  W<n> INV() { datum=(~datum) & MASK(); return *this; }
+  W<n> INC() { return this->ADD(1); }
+  W<n> DEC() { return this->ADD(-1); }
+  W<sizeof(unsigned int)> LOG();
+  W<n> LEFT(unsigned int dist) { datum=(datum<<dist) & MASK(); return *this;}
+  W<n> RIGHT(unsigned int dist) { datum=(datum>>dist); return *this;}
+  W<n> AND(unsigned int x) { datum=datum&x; return *this; }
+  W<n> OR(unsigned int x) { datum=(datum|x)&MASK(); return *this; }
+  W<n> ADD(unsigned int x) { datum=(datum+x)&MASK(); return *this; }
+  W<n> MUL(unsigned int x) { datum=(datum*x)&MASK(); return *this; }
 
-  template<typename U2, int n2>
-  W<U, n> ROTATE_L(W<U2, n2> dist) { ROTATE_L(dist.datum); return *this; }
-  template<typename U2, int n2>
-  W<U, n> ROTATE_R(W<U2, n2> dist) { ROTATE_R(dist.datum); return *this; }
-  template<typename U2, int n2>
-  W<U, n> AND(W<U2, n2> x) { AND(x.datum); return *this; }
-  template<typename U2, int n2>
-  W<U, n> OR(W<U2, n2> x) { OR(x.datum); return *this; }
-  template<typename U2, int n2>
-  W<U, n> ADD(W<U2, n2> x) { ADD(x.datum); return *this; }
-  template<typename U2, int n2>
-  W<U, n> MUL(W<U2, n2> x) { MUL(x.datum); return *this; }
+  W<n>& operator++() { INC(); return *this; }
+  W<n>& operator--() { DEC(); return *this; }
+  template<int n2>
+    W<n> operator<<(W<n2> dist) { return LEFT(dist); }
+  template<int n2>
+    W<n> operator>>(W<n2> dist) { return RIGHT(dist); }
+  W<n> operator<<(unsigned int dist) { return LEFT(dist); }
+  W<n> operator>>(unsigned int dist) { return RIGHT(dist); }
+  
+  template<int n2>
+  W<n> LEFT(W<n2> dist) { LEFT(dist.datum); return *this; }
+  template<int n2>
+  W<n> RIGHT(W<n2> dist) { RIGHT(dist.datum); return *this; }
+  template<int n2>
+  W<n> AND(W<n2> x) { AND(x.datum); return *this; }
+  template<int n2>
+  W<n> OR(W<n2> x) { OR(x.datum); return *this; }
+  template<int n2>
+  W<n> ADD(W<n2> x) { ADD(x.datum); return *this; }
+  template<int n2>
+  W<n> MUL(W<n2> x) { MUL(x.datum); return *this; }
 };
 
-template<typename U, int n>
-string W<U, n>::print() const {
+template<int n>
+string W<n>::print() const {
   string s;
-  W<U, n> w = *this;
+  W<n> w = *this;
   do {
     char c = '0' + w.datum % 10;
     w.datum /= 10;
@@ -68,9 +87,9 @@ string W<U, n>::print() const {
   return s;
 }
 
-template<typename U, int n>
-  W<unsigned int, sizeof(unsigned int)> W<U, n>::LOG() {
-  W<unsigned int, sizeof(unsigned int)> characteristic = 0;
+template<int n>
+  W<sizeof(unsigned int)> W<n>::LOG() {
+  W<sizeof(unsigned int)> characteristic = 0;
   while(datum >>= 1)
     characteristic.INC();
   return characteristic;

@@ -41,20 +41,8 @@ template<int n>
 template<class Z1, class Z2>
 Z1 operator&(Z1 z1, Z2 z2) { return z1.AND(z2); }
 
-template<class Z1, class Z2>
-Z1 operator|(Z1 z1, Z2 z2) { return z1.OR(z2); }
-
 template<class Z>
 Z operator~(Z z) { return z.INV(); }
-
-template<class Z1, class Z2>
-Z1 operator+(Z1 z1, Z2 z2) { return z1.ADD(z2); }
-
-template<class Z>
-Z operator-(Z z) { return (~z + 1); }
-
-template<class Z1, class Z2>
-Z1 operator-(Z1 z1, Z2 z2) { return z1 +(-z2); }
 
 template<class Z1, class Z2>
 Z1 operator*(Z1 z1, Z2 z2) { return z1.MUL(z2); }

@@ -42,6 +42,7 @@ class W {
     }
   }
   W<n> INV() { datum=(~datum) & MASK(); return *this; }
+  W<n> NEG() { datum=(-datum) & MASK(); return *this; }
   W<n> INC() { return this->ADD(1); }
   W<n> DEC() { return this->ADD(-1); }
   W<sizeof(unsigned int)> LOG();
@@ -50,6 +51,7 @@ class W {
   W<n> AND(unsigned int x) { datum=datum&x; return *this; }
   W<n> OR(unsigned int x) { datum=(datum|x)&MASK(); return *this; }
   W<n> ADD(unsigned int x) { datum=(datum+x)&MASK(); return *this; }
+  W<n> SUB(unsigned int x) { datum=(datum-x)&MASK(); return *this; }
   W<n> MUL(unsigned int x) { datum=(datum*x)&MASK(); return *this; }
 
   W<n>& operator++() { INC(); return *this; }
@@ -60,13 +62,44 @@ class W {
     W<n> operator>>(W<n2> dist) { return RIGHT(dist); }
   W<n> operator<<(unsigned int dist) { return LEFT(dist); }
   W<n> operator>>(unsigned int dist) { return RIGHT(dist); }
-
+  template<int n2>
+    W<n> operator+(const W<n2>& b) const {
+    W<n> r = *this;
+    r.ADD(b);
+    return r;
+  }
+  template<int n2>
+    W<n> operator-(const W<n2>& b) const {
+    W<n> r = *this;
+    r.SUB(b);
+    return r;
+  }
+  W<n> operator-() const {
+    W<n> r = *this;
+    r.NEG();
+    return r;
+  }
+  template<int n2>
+    W<n> operator|(const W<n2>& x) const {
+    W<n> r = *this;
+    r.OR(x.datum);
+    return r;
+  }
+  template<int n2>
+    W<n> operator&(const W<n2>& x) const {
+    W<n> r = *this;
+    r.AND(x.datum);
+    return r;
+  }
+  
   template<int n2>
     bool operator<(const W<n2>& b) const {return (datum < b.datum);}
   template<int n2>
     bool operator>(const W<n2>& b) const {return (datum > b.datum);}
   template<int n2>
     bool operator==(const W<n2>& b) const {return (datum == b.datum); }
+  template<int n2>
+    bool operator!=(const W<n2>& b) const {return (datum != b.datum); }
   template<int n2>
     bool operator<=(const W<n2>& b) const {return (datum <= b.datum); }
   template<int n2>
@@ -82,6 +115,8 @@ class W {
   W<n> OR(W<n2> x) { OR(x.datum); return *this; }
   template<int n2>
   W<n> ADD(W<n2> x) { ADD(x.datum); return *this; }
+  template<int n2>
+    W<n> SUB(W<n2> x) { SUB(x.datum); return *this; }
   template<int n2>
   W<n> MUL(W<n2> x) { MUL(x.datum); return *this; }
 };

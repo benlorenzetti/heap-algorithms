@@ -38,6 +38,7 @@ class N {
     }
   }
   N<n> INV() { datum=(~datum) | MASK(); return *this; }
+  N<n> NEG() { datum=(-datum) | MASK(); return *this; }
   N<n> INC() { return this->ADD(-1); }
   N<n> DEC() { return this->ADD(1); }
   W<sizeof(unsigned int)> LOG();
@@ -58,13 +59,32 @@ class N {
     N<n> operator>>(W<n2> dist) { return RIGHT(dist.datum); }
   N<n> operator<<(unsigned int dist) { return LEFT(dist); }
   N<n> operator>>(unsigned int dist) { return RIGHT(dist); }
-
+  template<int n2>
+    N<n> operator+(const N<n2>& b) const {
+    N<n> r = *this;
+    r.ADD(b);
+    return r;
+  }
+  template<int n2>
+    N<n> operator-(const N<n2> &b) const {
+    N<n> r = *this;
+    r.SUB(b);
+    return r;
+  }
+  N<n> operator-() const {
+    N<n> r = *this;
+    r.NEG();
+    return r;
+  }
+  
   template<int n2>
     bool operator<(const N<n2>& b) const {return (datum > b.datum);}
   template<int n2>
     bool operator>(const N<n2>& b) const {return (datum < b.datum);}
   template<int n2>
     bool operator==(const N<n2>& b) const {return (datum == b.datum);}
+  template<int n2>
+    bool operator!=(const N<n2>& b) const {return (datum != b.datum);}
   template<int n2>
     bool operator<=(const N<n2>& b) const {return (datum >= b.datum);}
   template<int n2>

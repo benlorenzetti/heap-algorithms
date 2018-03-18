@@ -30,10 +30,55 @@ bool match(T& a, const T& tmp, const T& b, bool (*invr)(const T&, const T&)) {
 }
 
 template<typename Iterator, typename T, int n>
-  void nwjunction(N<n>, W<n>, Iterator, bool (*)(const T&, const T&));
+  bool verify_heap(W<n> a, W<n> b, Iterator base, bool (*rel)(const T&, const T&)) {
+  W<n> l = lchild(b);
+  W<n> r = rchild(b);
+  if(r < b)
+    return true;
+  else if(a > lchild(b) || a == W<n>(0)) {
+    if(rel(base[l.datum], base[b.datum]) && rel(base[r.datum], base[b.datum]))
+      return true;
+    else
+      return false;
+  }
+  else if(a == rchild(b)) {
+    if(rel(base[r.datum], base[b.datum]))
+      return true;
+    else
+      return false;
+  }
+  else
+    return true;
+}
 
 template<typename Iterator, typename T, int n>
-  void wnjunction(N<n>, W<n>, Iterator, bool (*)(const T&, const T&));
+  bool verify_heap(N<n> a, N<n> b, Iterator base, bool (*rel)(const T&, const T&)) {
+  W<n> p = W<n>(a);
+  W<n> l = W<n>(lchild(a));
+  W<n> r = W<n>(rchild(a));
+  if(a > lchild(a))
+    return true;
+  else if(rchild(a) <= b) {
+    if(rel(base[p.datum], base[l.datum]) && rel(base[p.datum], base[r.datum]))
+      return true;
+    else
+      return false;
+  }
+  else if(lchild(a) == b) {
+    if(rel(base[p.datum], base[l.datum]))
+      return true;
+    else
+      return false;
+  }
+  else
+    return true;
+}
+
+template<typename Iterator, typename T, int n>
+  void nwjunction(N<n>, W<n>, W<n>, Iterator, bool (*)(const T&, const T&));
+
+template<typename Iterator, typename T, int n>
+  void wnjunction(N<n>, N<n>, W<n>, Iterator, bool (*)(const T&, const T&));
 
 template<typename Iterator, typename T, int n>
   void wdrift(W<n> j, W<n> b, Iterator base, bool (*invr)(const T&, const T&)) {
@@ -62,18 +107,18 @@ template<typename Iterator, typename T, int n>
 }
 
 template<typename Iterator, typename T, int n>
-  void wdiffuse(N<n> a, W<n> m, W<n> j, Iterator base, bool (*invr)(const T&, const T&)) {
+  void wdiffuse(N<n> a, N<n> i, W<n> m, W<n> j, Iterator base, bool (*invr)(const T&, const T&)) {
   cout << "wdiffuse(" << a << ", " << m << ", w" << j << ") ";
   W<n> l = lchild(j);
   W<n> r = rchild(j);
   if(m == (r&m))
-    wnjunction(a, j, base, invr);
+    wnjunction(a, i, j, base, invr);
   else if(invr(base[l.datum], base[r.datum])) {
     if(invr(base[l.datum], base[j.datum])) {
       cout << "lswap(w" << l << "," << base[l.datum] << ")<->(w";
       cout << j << "," << base[j.datum] << ") ";
       iter_swap(base+l.datum, base+j.datum);
-      wdiffuse(a, m, l, base, invr);
+      wdiffuse(a, i, m, l, base, invr);
     }
   }
   else {
@@ -81,25 +126,25 @@ template<typename Iterator, typename T, int n>
       cout << "rswap(w" << r << "," << base[r.datum] << ")<->(w";
       cout << j << "," << base[j.datum] << ") ";
       iter_swap(base+r.datum, base+j.datum);
-      wdiffuse(a, m, r, base, invr);
+      wdiffuse(a, i, m, r, base, invr);
     }
   }
 }
 
 template<typename Iterator, typename T, int n>
-  void ndiffuse(N<n> i, W<n> m, W<n> b, Iterator base, bool (*invr)(const T&, const T&)) {
+  void ndiffuse(N<n> i, W<n> m, W<n> j, W<n> b, Iterator base, bool (*invr)(const T&, const T&)) {
   cout << "ndiffuse(" << i << ", " << m << ", w" << b << ") ";
   W<n> p = W<n>(i);
   W<n> l = W<n>(lchild(i));
   W<n> r = W<n>(rchild(i));
   if(m != (r&m))
-    nwjunction(i, b, base, invr);
+    nwjunction(i, j, b, base, invr);
   else if(invr(base[r.datum], base[l.datum])) {
     if(invr(base[p.datum], base[l.datum])) {
       cout << "lswap(" << i << "," << base[p.datum] << ")<->(";
       cout << lchild(i) << "," << base[l.datum] << ") ";
       iter_swap(base+l.datum, base+p.datum);
-      ndiffuse(lchild(i), m, b, base, invr);
+      ndiffuse(lchild(i), m, j, b, base, invr);
     }
   }
   else {
@@ -107,13 +152,13 @@ template<typename Iterator, typename T, int n>
       cout << "rswap(" << i << "," << base[p.datum] << ")<->(";
       cout << rchild(i) << "," << base[r.datum] << ") ";
       iter_swap(base+r.datum, base+p.datum);
-      ndiffuse(rchild(i), m, b, base, invr);
+      ndiffuse(rchild(i), m, j, b, base, invr);
     }
   }
 }
 
 template<typename Iterator, typename T, int n>
-  void wnjunction(N<n> a, W<n> j, Iterator base, bool (*invr)(const T&, const T&)) {
+  void wnjunction(N<n> a, N<n> i, W<n> j, Iterator base, bool (*invr)(const T&, const T&)) {
   cout << "wnjunction(" << a << ", w" << j << ") ";
   W<n> l = lchild(j);
   W<n> r = rchild(j);
@@ -136,14 +181,14 @@ template<typename Iterator, typename T, int n>
     fall_left = true;
   }
   if(fall_left)
-    ndrift(a, l, base, invr);
+    ndrift(i, l, base, invr);
   else if(fall_right)
-    ndrift(a, r, base, invr);
+    ndrift(i, r, base, invr);
   else {}
 }
 
 template<typename Iterator, typename T, int n>
-  void nwjunction(N<n> i, W<n> b, Iterator base, bool (*invr)(const T&, const T&)) {
+  void nwjunction(N<n> i, W<n> j, W<n> b, Iterator base, bool (*invr)(const T&, const T&)) {
   cout << "nwjunction(" << i << ", w" << b << ") ";
   W<n> p = W<n>(i);
   W<n> l = W<n>(lchild(i));
@@ -168,9 +213,9 @@ template<typename Iterator, typename T, int n>
   }
   
   if(fall_right)
-    wdrift(r, b, base, invr);
+    wdrift(r, j, base, invr);
   else if(fall_left)
-    wdrift(l, b, base, invr);
+    wdrift(l, j, base, invr);
   else
     return;
 }
@@ -182,9 +227,9 @@ template<typename Iterator, typename T, int n>
   N<n> i = N<n>(m);
   W<n> j = m - W<1>(1);
   do {
-    wdiffuse(a, m, j, base, invr);
+    wdiffuse(a, i, m, j, base, invr);
     cout << endl;
-    ndiffuse(i, m, b, base, invr);
+    ndiffuse(i, m, j, b, base, invr);
     cout << endl;
     --i;
     --j;

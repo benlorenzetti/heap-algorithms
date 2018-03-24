@@ -47,8 +47,8 @@ bool gt(const T& a, const T& b) {return (a>b);}
 bool intgt(const int& a, const int& b) { return (a>b); }
 bool intleq(const int& a, const int& b) { return (a<=b); }
 
-const int POWER = 5;
-const int SEED = 2;
+const int POWER = 17;
+const int SEED = 1;
 
 int main() {
   vector<int> v(1<<POWER);

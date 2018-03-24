@@ -37,28 +37,28 @@ class N {
       return mask;
     }
   }
-  N<n> INV() { datum=(~datum) | MASK(); return *this; }
-  N<n> NEG() { datum=(-datum) | MASK(); return *this; }
-  N<n> INC() { return this->ADD(-1); }
-  N<n> DEC() { return this->ADD(1); }
+  void INV() { datum=(~datum) | MASK(); }
+  void NEG() { datum=(-datum) | MASK(); }
+  void INC() { this->ADD(-1); }
+  void DEC() { this->ADD(1); }
   W<sizeof(unsigned int)> LOG();
-  N<n> LEFT(unsigned int dist) { datum=(datum<<dist) | MASK(); return *this; }
-  N<n> RIGHT(unsigned int dist) { datum=(datum>>dist) | MASK(); return *this; }
-  N<n> AND(unsigned int x) { datum=(datum&x)|MASK(); return *this; }
-  N<n> OR(unsigned int x) { datum=datum|x; }
-  N<n> ADD(unsigned int x) { datum=(datum+x)|MASK(); return *this; }
-  N<n> SUB(unsigned int x) { datum=(datum-x)|MASK(); return *this; }
-  N<n> MUL(unsigned int x) { datum=(datum*x)|MASK(); return *this; }
-  N<n> DIV(unsigned int x);
+  void LEFT(unsigned int dist) { datum=(datum<<dist) | MASK(); }
+  void RIGHT(unsigned int dist) { datum=(datum>>dist) | MASK(); }
+  void AND(unsigned int x) { datum=(datum&x)|MASK(); }
+  void OR(unsigned int x) { datum=datum|x; }
+  void ADD(unsigned int x) { datum=(datum+x)|MASK(); }
+  void SUB(unsigned int x) { datum=(datum-x)|MASK(); }
+  void MUL(unsigned int x) { datum=(datum*x)|MASK(); }
+  void DIV(unsigned int x);
 
   N<n>& operator++() { INC(); return *this; }
   N<n>& operator--() { DEC(); return *this; }
   template<int n2>
-    N<n> operator<<(W<n2> dist) { return LEFT(dist.datum); }
+    N<n> operator<<(W<n2> dist) { LEFT(dist.datum); return *this; }
   template<int n2>
-    N<n> operator>>(W<n2> dist) { return RIGHT(dist.datum); }
-  N<n> operator<<(unsigned int dist) { return LEFT(dist); }
-  N<n> operator>>(unsigned int dist) { return RIGHT(dist); }
+    N<n> operator>>(W<n2> dist) { RIGHT(dist.datum); return *this; }
+  N<n> operator<<(unsigned int dist) { LEFT(dist); return *this; }
+  N<n> operator>>(unsigned int dist) { RIGHT(dist); return *this; }
   template<int n2>
     N<n> operator+(const N<n2>& b) const {
     N<n> r = *this;

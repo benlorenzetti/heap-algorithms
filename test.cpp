@@ -3,9 +3,15 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <string>
 using namespace std;
 
-void save(vector<int>& v, const char* filename) {
+
+bool intgt(const int& a, const int& b) { return (a>b); }
+bool intlt(const int& a, const int& b) { return (a<b); }
+bool inteq(const int& a, const int& b) { return (a==b); }
+
+void save(vector<int>& v, string filename) {
   ofstream filestream;
   filestream.open(filename);
   N<32> i(0);
@@ -40,29 +46,40 @@ void generate(vector<int>& v, int seed) {
   } while(--i);
 }
 
-template<typename T>
-bool lt(const T& a, const T& b) {return (a<b);}
-template<typename T>
-bool gt(const T& a, const T& b) {return (a>b);}
-bool intgt(const int& a, const int& b) { return (a>b); }
-bool intleq(const int& a, const int& b) { return (a<=b); }
-
-const int POWER = 17;
-const int SEED = 1;
+const int POWER = 16;
+const int SEED = 0;
+const int RUNS = 1;
 
 int main() {
-  vector<int> v(1<<POWER);
-  generate(v, SEED);
-  save(v, "input.csv");
-  print(v);
 
-  N<POWER> a(1<<POWER);
-  W<POWER> m, b;
-  m = v.size() / 2;
-  b = 0;
-  build_dual_heap(v.begin(), a, m, b, intgt);
-  print(v);
+  vector<int> v(1<<POWER);
+  W<POWER> a = 0;
+  W<POWER> m = 1 << (POWER-1);
+  W<POWER> b = 0;
+
+  vector<int> median_estimate_difs, partition_difs;
+
+  int seed = SEED;
+  for(int i=0; i<RUNS; i++, seed++) {
+    generate(v, seed);
+    sort(v.begin(), v.end());
+    int true_median = v[m.datum];
+    generate(v, seed);
+    //heap_median<POWER>(v.begin());
+    winnow_heap(N<POWER>(a), m, b, v.begin(), intgt);
+    median_estimate_difs.push_back(estimate_dif(a, b, v.begin(), intlt, inteq, v[m.datum]));
+    partition_difs.push_back(partition_dif(a, m, v.begin(), intgt, true_median).datum);
+  }
+  int max_med_est_dif = -(*min_element(median_estimate_difs.begin(), median_estimate_difs.end()));
+  max_med_est_dif = max(max_med_est_dif, *min_element(median_estimate_difs.begin(), median_estimate_difs.end()));
+  float noverlogn = (1<<POWER)/(float)POWER;
+  int max_part_dif = *max_element(partition_difs.begin(), partition_difs.end());
+  cout << "max_med_est_dif_pct = " << max_med_est_dif / noverlogn << endl;
+  cout << "   max_part_dif_pct = " << max_part_dif / noverlogn << endl;
+  save(median_estimate_difs, to_string(POWER) + "median-estimate-difs.csv");
+  save(partition_difs, to_string(POWER) + "partition-difs.csv");
   
+  /*
   N<POWER> n(0);
   W<POWER> w(-1);
   do {
@@ -75,7 +92,8 @@ int main() {
       cout << "W heap violation at " << n << "(" << w << "): \n";
     }
   } while(n != N<POWER>(0));
-  
+  */  
+
   save(v, "output.csv");
 }
 

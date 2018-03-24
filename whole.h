@@ -41,27 +41,27 @@ class W {
       return mask;
     }
   }
-  W<n> INV() { datum=(~datum) & MASK(); return *this; }
-  W<n> NEG() { datum=(-datum) & MASK(); return *this; }
-  W<n> INC() { return this->ADD(1); }
-  W<n> DEC() { return this->ADD(-1); }
+  void INV() { datum=(~datum) & MASK(); }
+  void NEG() { datum=(-datum) & MASK(); }
+  void INC() { this->ADD(1); }
+  void DEC() { this->ADD(-1); }
   W<sizeof(unsigned int)> LOG();
-  W<n> LEFT(unsigned int dist) { datum=(datum<<dist) & MASK(); return *this;}
-  W<n> RIGHT(unsigned int dist) { datum=(datum>>dist); return *this;}
-  W<n> AND(unsigned int x) { datum=datum&x; return *this; }
-  W<n> OR(unsigned int x) { datum=(datum|x)&MASK(); return *this; }
-  W<n> ADD(unsigned int x) { datum=(datum+x)&MASK(); return *this; }
-  W<n> SUB(unsigned int x) { datum=(datum-x)&MASK(); return *this; }
-  W<n> MUL(unsigned int x) { datum=(datum*x)&MASK(); return *this; }
+  void LEFT(unsigned int dist) { datum=(datum<<dist) & MASK(); }
+  void RIGHT(unsigned int dist) { datum=(datum>>dist); }
+  void AND(unsigned int x) { datum=datum&x; }
+  void OR(unsigned int x) { datum=(datum|x)&MASK();  }
+  void ADD(unsigned int x) { datum=(datum+x)&MASK(); }
+  void SUB(unsigned int x) { datum=(datum-x)&MASK(); }
+  void MUL(unsigned int x) { datum=(datum*x)&MASK(); }
 
   W<n>& operator++() { INC(); return *this; }
   W<n>& operator--() { DEC(); return *this; }
   template<int n2>
-    W<n> operator<<(W<n2> dist) { return LEFT(dist); }
+    W<n> operator<<(W<n2> dist) { W<n>r=*this; r.LEFT(dist.datum); return r; }
   template<int n2>
-    W<n> operator>>(W<n2> dist) { return RIGHT(dist); }
-  W<n> operator<<(unsigned int dist) { return LEFT(dist); }
-  W<n> operator>>(unsigned int dist) { return RIGHT(dist); }
+    W<n> operator>>(W<n2> dist) { W<n>r=*this; r.RIGHT(dist.datum); return r; }
+  W<n> operator<<(unsigned int dist) { W<n>r=*this; r.LEFT(dist); return r; }
+  W<n> operator>>(unsigned int dist) { W<n>r=*this; r.RIGHT(dist); return r; }
   template<int n2>
     W<n> operator+(const W<n2>& b) const {
     W<n> r = *this;
